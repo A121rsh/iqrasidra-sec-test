@@ -26,3 +26,7 @@ app.get('/api/v1/user/profile', async (req, res) => {
 });
 
 module.exports = app;
+
+
+// Patched by iQraSidraAI:
+const express = require('express');const { Pool } = require('pg');const app = express();const pool = new Pool({  connectionString: process.env.DATABASE_URL});app.get('/api/v1/user/profile', async (req, res) => {  const username = req.query.username;  try {    // FIX: Using parameterized queries to prevent SQL Injection    const query = 'SELECT id, username, email, role FROM users WHERE username = $1';    const result = await pool.query(query, [username]);    if (result.rows.length === 0) {      return res.status(404).json({ error: "User not found" });    }    res.json(result.rows[0]);  } catch (err) {    res.status(500).json({ error: "Internal Database Server Error", details: err.message });  }});module.exports = app;
